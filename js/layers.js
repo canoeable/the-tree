@@ -61,6 +61,9 @@ addLayer("p", { // Superboops
             cost() { 
                 return new Decimal(10).pow(1.75.pow(getBuyableAmt(this.layer, this.id))) 
             },
+            title() {
+                return "boost"
+            },
             display() { 
                 return "x1.5 to points, but increases at ^1.75" 
             },

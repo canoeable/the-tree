@@ -1,6 +1,6 @@
-addLayer("p", { // Superboops
-    name: "Superboops", // This is optional, only used in a few places, If absent it just uses the layer id.
-    symbol: "S", // This appears on the layer's node. Default is the id with the first letter capitalized
+addLayer("p", { // prestige points
+    name: "prestige points", // This is optional, only used in a few places, If absent it just uses the layer id.
+    symbol: "P", // This appears on the layer's node. Default is the id with the first letter capitalized
     position: 0, // Horizontal position within a row. By default it uses the layer id and sorts in alphabetical order
     startData() { return {
         unlocked: true,
@@ -8,7 +8,7 @@ addLayer("p", { // Superboops
     }},
     color: "#4BDC13",
     requires: new Decimal(10), // Can be a function that takes requirement increases into account
-    resource: "superboops", // Name of prestige currency
+    resource: "prestige points", // Name of prestige currency
     baseResource: "points", // Name of resource prestige is based on
     baseAmount() {return player.points}, // Get the current amount of baseResource
     type: "normal", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
@@ -27,7 +27,7 @@ addLayer("p", { // Superboops
     },
     row: 0, // Row the layer is in on the tree (0 is the first row)
     hotkeys: [
-        {key: "s", description: "S: Reset for superboops", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
+        {key: "p", description: "P: Reset for prestige points", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
     ],
     layerShown(){return true},
     autoUpgrade() {
@@ -59,26 +59,25 @@ addLayer("p", { // Superboops
         cols: 1, // # of columns 
         11: { 
             cost() { 
-                return new Decimal(10).pow(1.75.pow(getBuyableAmt(this.layer, this.id))) 
+                return new Decimal(10).pow(new Decimal (1.9).pow(getBuyableAmount(this.layer, this.id)))
             },
             title() {
                 return "boost"
             },
             display() { 
-                return "x1.5 to points, but increases at ^1.75" 
+                return "x1.5 to points, but increases at ^1.75. <br>Cost: " + format(tmp[this.layer].buyables[this.id].cost) + "<br> Effect: " + format(buyableEffect(this.layer, this.id)) + "x"
             },
             canAfford() { 
                 return player[this.layer].points.gte(this.cost()) 
             },
             buy() {
                 player[this.layer].points = player[this.layer].points.sub(this.cost())
-                setBuyableAmount(this.layer, this.id, getBuyableAmt(this.layer, this.id).add(1))
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
             },
             effect() {
-                let eff = new Decimal(1.5).pow((getBuyableAmt(this.layer, this.id)))
+                let eff = new Decimal(1.5).pow((getBuyableAmount(this.layer, this.id)))
                 return eff
             },
-            effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" },
         },
     },
     upgrades: {
@@ -137,7 +136,7 @@ addLayer("p", { // Superboops
         },
         14: {
             title: "boost!",
-            description: "points are multiplied by (1.001^superboops)+1. capped at x500",
+            description: "points are multiplied by (1.001^prestige points)+1. capped at x500",
             cost: new Decimal (2000),
             effect() {
                 if (new Decimal (1.001).pow(player[this.layer].points).add(1).gte(500)) {
@@ -238,13 +237,13 @@ addLayer("Cap Info", { // Caps
     infoboxes: {
         Row1: {
             title: "softcaps",
-            body() { return "Superboops: 100,000 and every 2 OoMs after (so 100,000, 10,000,000 etc) the gain is brought to the 0.7th power. Megaboops: After 100 and every OoM after that, gain is brought to ^0.9" },
+            body() { return "prestige points: 100,000 and every 2 OoMs after (so 100,000, 10,000,000 etc) the gain is brought to the 0.7th power. point boosts: After 100 and every OoM after that, gain is brought to ^0.9" },
         },
     }
 })
-addLayer("m", { // Megaboops
-    name: "Megaboops", // This is optional, only used in a few places, If absent it just uses the layer id.
-    symbol: "M", // This appears on the layer's node. Default is the id with the first letter capitalized
+addLayer("m", { // point boosts
+    name: "point boosts", // This is optional, only used in a few places, If absent it just uses the layer id.
+    symbol: "PB", // This appears on the layer's node. Default is the id with the first letter capitalized
     position: 0, // Horizontal position within a row. By default it uses the layer id and sorts in alphabetical order
     startData() { return {
         unlocked: true,
@@ -252,8 +251,8 @@ addLayer("m", { // Megaboops
     }},
     color: "#047562",
     requires: new Decimal(250000), // Can be a function that takes requirement increases into account
-    resource: "megaboops", // Name of prestige currency
-    baseResource: "superboops", // Name of resource prestige is based on
+    resource: "point boosts", // Name of prestige currency
+    baseResource: "prestige points", // Name of resource prestige is based on
     baseAmount() {return player.p.points}, // Get the current amount of baseResource
     type: "normal", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
     exponent: 1.31, // Prestige currency exponent
@@ -267,7 +266,7 @@ addLayer("m", { // Megaboops
     },
     row: 1, // Row the layer is in on the tree (0 is the first row)
     hotkeys: [
-        {key: "m", description: "M: Reset for Megaboops", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
+        {key: "m", description: "M: Reset for point boosts", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
     ],
     layerShown(){
         if ((hasUpgrade('p', 21))) {
@@ -297,7 +296,7 @@ addLayer("m", { // Megaboops
         }
     },
     effectDescription() {
-        return "multiplying point gain by " + format(tmp[this.layer].effect) + ". Next layer at 20 megaboops."
+        return "multiplying point gain by " + format(tmp[this.layer].effect) + ". Next layer at 20 point boosts."
     },
     directMult() {
         dmult = new Decimal (1)
@@ -308,7 +307,7 @@ addLayer("m", { // Megaboops
     upgrades: {
         11: {
             title: "upgrades",
-            description: "boosts superboops based on megaboops",
+            description: "boosts prestige points based on point boosts",
             cost: new Decimal (1),
             effect() {
                 if (player[this.layer].points.add(1).gte(10)) {
@@ -345,8 +344,8 @@ addLayer("m", { // Megaboops
         },
     }
 })
-addLayer("b", { // Megaboosters
-    name: "megaboosters", // This is optional, only used in a few places, If absent it just uses the layer id.
+addLayer("b", { // booster
+    name: "booster", // This is optional, only used in a few places, If absent it just uses the layer id.
     symbol: "MB", // This appears on the layer's node. Default is the id with the first letter capitalized
     position: 0, // Horizontal position within a row. By default it uses the layer id and sorts in alphabetical order
     startData() { return {
@@ -355,8 +354,8 @@ addLayer("b", { // Megaboosters
     }},
     color: "#047562",
     requires: new Decimal(20), // Can be a function that takes requirement increases into account
-    resource: "megaboosters", // Name of prestige currency
-    baseResource: "megaboops", // Name of resource prestige is based on
+    resource: "booster", // Name of prestige currency
+    baseResource: "point boosts", // Name of resource prestige is based on
     baseAmount() {return player.m.points}, // Get the current amount of baseResource
     type: "static", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
     exponent: 1.5, // Prestige currency exponent
@@ -370,7 +369,7 @@ addLayer("b", { // Megaboosters
     },
     row: 2, // Row the layer is in on the tree (0 is the first row)
     hotkeys: [
-        {key: "b", description: "B: Reset for megaboosters", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
+        {key: "b", description: "B: Reset for booster", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
     ],
     layerShown(){
         if (player.m.points.gte(20)) {
@@ -410,7 +409,7 @@ addLayer("a", { // Trueboosters
     color: "#FF0A0A",
     requires: new Decimal(20), // Can be a function that takes requirement increases into account
     resource: "trueboosters", // Name of prestige currency
-    baseResource: "megaboops", // Name of resource prestige is based on
+    baseResource: "point boosts", // Name of resource prestige is based on
     baseAmount() {return player.m.points}, // Get the current amount of baseResource
     type: "static", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
     exponent: 1.7, // Prestige currency exponent

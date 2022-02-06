@@ -54,6 +54,30 @@ addLayer("p", { // Superboops
         dmult = dmult.times(layers.a.effect())
         return dmult
     },
+    buyables: { 
+        rows: 1, // # of rows 
+        cols: 1, // # of columns 
+        11: { 
+            cost() { 
+                return new Decimal(10).pow(1.75.pow(getBuyableAmt(this.layer, this.id))) 
+            },
+            display() { 
+                return "x1.5 to points, but increases at ^1.75" 
+            },
+            canAfford() { 
+                return player[this.layer].points.gte(this.cost()) 
+            },
+            buy() {
+                player[this.layer].points = player[this.layer].points.sub(this.cost())
+                setBuyableAmount(this.layer, this.id, getBuyableAmt(this.layer, this.id).add(1))
+            },
+            effect() {
+                let eff = new Decimal(1.5).pow((getBuyableAmt(this.layer, this.id)))
+                return eff
+            },
+            effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" },
+        },
+    },
     upgrades: {
         11: {
             title: "upgrade row 1 col 1",

@@ -58,13 +58,13 @@ addLayer("p", { // prestige points
         cols: 1, // # of columns 
         11: { 
             cost() { 
-                return new Decimal(10).pow(new Decimal (3).pow(getBuyableAmount(this.layer, this.id)))
+                return new Decimal(1).mul(new Decimal (10000).pow(getBuyableAmount(this.layer, this.id)))
             },
             title() {
                 return "boost"
             },
             display() { 
-                return "x3 to points, but increases at ^3. <br>Cost: " + format(tmp[this.layer].buyables[this.id].cost) + "<br> Effect: " + format(buyableEffect(this.layer, this.id)) + "x"
+                return "x10 to points, but increases at x10000. <br>Cost: " + format(tmp[this.layer].buyables[this.id].cost) + "<br> Effect: " + format(buyableEffect(this.layer, this.id)) + "x"
             },
             canAfford() { 
                 return player[this.layer].points.gte(this.cost()) 
@@ -74,7 +74,7 @@ addLayer("p", { // prestige points
                 setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
             },
             effect() {
-                let eff = new Decimal(3).pow((getBuyableAmount(this.layer, this.id)))
+                let eff = new Decimal(10).pow((getBuyableAmount(this.layer, this.id)))
                 return eff
             },
         },
@@ -116,7 +116,7 @@ addLayer("p", { // prestige points
         13: {
             title: "upgrade",
             description: "shiny new effect!! capped at x1000",
-            cost: new Decimal (1000),
+            cost: new Decimal (1500),
             effect() {
                 if (player[this.layer].points.pow(0.05).add(1).gte(1000)) {
                     return 1000
@@ -136,7 +136,7 @@ addLayer("p", { // prestige points
         14: {
             title: "boost!",
             description: "points are multiplied by (1.001^prestige points)+1. capped at x500",
-            cost: new Decimal (2000),
+            cost: new Decimal (5000),
             effect() {
                 if (new Decimal (1.001).pow(player[this.layer].points).add(1).gte(500)) {
                     return 500
@@ -156,7 +156,7 @@ addLayer("p", { // prestige points
         15: {
             title: "lol",
             description: "Multiplies point generation by 0",
-            cost: new Decimal (50000),
+            cost: new Decimal (150000),
             unlocked() {
                 if (hasUpgrade('p', 14)) {
                     return true
@@ -170,7 +170,7 @@ addLayer("p", { // prestige points
             description: "new layer!",
             cost: new Decimal (1),
             unlocked() {
-                if (player[this.layer].points.gte(250001)) {
+                if (player[this.layer].points.gte(750001)) {
                     return true
                 } else {
                     if (hasUpgrade('p', 21)) {
@@ -183,9 +183,9 @@ addLayer("p", { // prestige points
         },
         effectDescription() {
             if (player[this.layer].points.gte(100000)) {
-                return (softcapped)
+                return "(softcapped)"
             } else {
-                return
+                return ""
             }
         }
     },

@@ -37,9 +37,6 @@ addLayer("p", { // prestige points
             return false
         }
     },
-    automate(){
-        buyBuyable('p', 11)
-    },
     passiveGeneration() {
         if (hasUpgrade('m', 13)) {
             return new Decimal (1)
@@ -78,13 +75,16 @@ addLayer("p", { // prestige points
             },
             effect() {
                 let eff = new Decimal(10).pow((getBuyableAmount(this.layer, this.id)))
+                if (hasMilestone('a', 11)) eff = 1
                 return eff
             },
-            automate(diff){
-                if (hasMilestone('a', 12)){
-                    buyable.buyMax(bulk)
+            unlocked() {
+                if (hasMilestone('a', 11)) {
+                    return false
+                } else {
+                    return true
                 }
-            },
+            }
         },
     },
     upgrades: {
@@ -461,7 +461,7 @@ addLayer("a", { // QoL points
             }
         },
         12: {
-            effectDescription: "Autobuy prestige points buyables",
+            effectDescription: "Remove the bonus buyable, but use a formula to mirror its effects (10^(log10(prestige points)/4)*10).",
             requirementDescription: "12 total QoL points",
             done() {
                 if (player.a.total.gte(12)) {
@@ -480,7 +480,7 @@ addLayer("a", { // QoL points
         return eff
     },
     effectDescription() {
-        return "multiplying points by " + format(tmp[this.layer].effect)
+        return "multiplying points by " + format(tmp[this.layer].effect) + ". 12 QoL milestone is " + format(new Decimal (10).pow(Decimal.log10(player.p.points).div(4)).mul(10)) + "x"
     }
 })
 addLayer("t", { // Trueboops

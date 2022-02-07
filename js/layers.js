@@ -51,7 +51,6 @@ addLayer("p", { // prestige points
         } else {
             dmult = dmult
         }
-        dmult = dmult.times(layers.a.effect())
         return dmult
     },
     buyables: { 
@@ -306,7 +305,6 @@ addLayer("m", { // point boosts
     directMult() {
         dmult = new Decimal (1)
         dmult = dmult.times(layers.b.effect())
-        dmult = dmult.times(layers.a.effect())
         return dmult
     },
     upgrades: {

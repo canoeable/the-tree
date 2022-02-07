@@ -58,13 +58,13 @@ addLayer("p", { // prestige points
         cols: 1, // # of columns 
         11: { 
             cost() { 
-                return new Decimal(10).pow(new Decimal (1.9).pow(getBuyableAmount(this.layer, this.id)))
+                return new Decimal(10).pow(new Decimal (3).pow(getBuyableAmount(this.layer, this.id)))
             },
             title() {
                 return "boost"
             },
             display() { 
-                return "x3 to points, but increases at ^1.9. <br>Cost: " + format(tmp[this.layer].buyables[this.id].cost) + "<br> Effect: " + format(buyableEffect(this.layer, this.id)) + "x"
+                return "x3 to points, but increases at ^3. <br>Cost: " + format(tmp[this.layer].buyables[this.id].cost) + "<br> Effect: " + format(buyableEffect(this.layer, this.id)) + "x"
             },
             canAfford() { 
                 return player[this.layer].points.gte(this.cost()) 
@@ -192,6 +192,7 @@ addLayer("p", { // prestige points
     doReset() {
         let keep = [];
         if(hasMilestone('a', 11)&&resettingLayer == 'm' || 'b' || 'a')keep.push("upgrades");
+        if(resettingLayer == 'p')keep.push("points");
         layerDataReset(this.layer, keep);
     }
 })
@@ -270,7 +271,7 @@ addLayer("m", { // point boosts
     },
     row: 1, // Row the layer is in on the tree (0 is the first row)
     hotkeys: [
-        {key: "m", description: "M: Reset for point boosts", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
+        {key: "o", description: "O: Reset for point boosts", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
     ],
     layerShown(){
         if ((hasUpgrade('p', 21))) {

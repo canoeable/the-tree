@@ -37,6 +37,9 @@ addLayer("p", { // prestige points
             return false
         }
     },
+    automate(){
+        buyBuyable('p', 11)
+    },
     passiveGeneration() {
         if (hasUpgrade('m', 13)) {
             return new Decimal (1)
@@ -76,6 +79,11 @@ addLayer("p", { // prestige points
             effect() {
                 let eff = new Decimal(10).pow((getBuyableAmount(this.layer, this.id)))
                 return eff
+            },
+            automate(diff){
+                if (hasMilestone('a', 12)){
+                    buyable.buyMax(bulk)
+                }
             },
         },
     },
@@ -191,7 +199,7 @@ addLayer("p", { // prestige points
     },
     doReset(resettingLayer) {
         let keep = [];
-        if(hasMilestone('a', 11)&&resettingLayer == 'm' || 'b' || 'a')keep.push("upgrades");
+        if(hasMilestone('a', 11))keep.push("upgrades");
         if(resettingLayer == 'p')keep.push("points");
         if(resettingLayer == 'p')keep.push("buyables");
         if(resettingLayer == 'p')keep.push("upgrades");
@@ -262,7 +270,7 @@ addLayer("m", { // point boosts
     baseResource: "prestige points", // Name of resource prestige is based on
     baseAmount() {return player.p.points}, // Get the current amount of baseResource
     type: "normal", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
-    exponent: 1.31, // Prestige currency exponent
+    exponent: 0.88, // Prestige currency exponent
     gainMult() { // Calculate the multiplier for main currency from bonuses
         mult = new Decimal(1)
         if (player.t.points.gte(3)) mult = mult.times(tmp.t.effect)
@@ -292,18 +300,15 @@ addLayer("m", { // point boosts
     },
     branches: 'p',
     effect() {
-        if (player[this.layer].points.times(3).gte(1)) {
-            if (player[this.layer].points.times(3).gte(333)) {
-                return 333
-            } else {
-                return player[this.layer].points.times(3)
-            }
-        } else {
-            return 1
-        }
+        eff = new Decimal (1)
+        eff = eff.mul(player[this.layer].points).mul(3).add(1)
+        eff = softcap(eff, new Decimal (350), 0.7)
+        eff = softcap(eff, new Decimal (700), 0.5)
+        if(eff.gte(1000)) eff = new Decimal (1000)
+        return eff
     },
     effectDescription() {
-        return "multiplying point gain by " + format(tmp[this.layer].effect) + ". Next layer at 20 point boosts."
+        return "multiplying point gain by " + format(tmp[this.layer].effect)
     },
     directMult() {
         dmult = new Decimal (1)
@@ -418,7 +423,7 @@ addLayer("a", { // QoL points
     baseResource: "point boosts", // Name of resource prestige is based on
     baseAmount() {return player.m.points}, // Get the current amount of baseResource
     type: "normal", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
-    exponent: 1.7, // Prestige currency exponent
+    exponent: 0.78, // Prestige currency exponent
     gainMult() { // Calculate the multiplier for main currency from bonuses
         mult = new Decimal(1)
         if (player.t.points.gte(4)) mult = mult.times(tmp.t.effect)
@@ -445,16 +450,37 @@ addLayer("a", { // QoL points
     branches: 'm',
     milestones: {
         11: {
-            effectDescription: "Keep prestige point upgrades on row 2 & 3 resets",
-            requirementDescription: "5 total QoL points",
+            effectDescription: "Keep prestige point upgrades.",
+            requirementDescription: "7 total QoL points",
             done() {
-                if (player.a.total.gte(5)) {
+                if (player.a.total.gte(7)) {
                     return true
                 } else {
                     return false
                 }
             }
-        }
+        },
+        12: {
+            effectDescription: "Autobuy prestige points buyables",
+            requirementDescription: "12 total QoL points",
+            done() {
+                if (player.a.total.gte(12)) {
+                    return true
+                } else {
+                    return false
+                }
+            }
+        },
+    },
+    effect() {
+        eff = new Decimal (1)
+        eff = eff.mul(player[this.layer].points).mul(3.3).add(1)
+        eff = softcap(eff, new Decimal (33), 0.66)
+        if(eff.gte(68)) eff = 99
+        return eff
+    },
+    effectDescription() {
+        return "multiplying points by " + format(tmp[this.layer].effect)
     }
 })
 addLayer("t", { // Trueboops

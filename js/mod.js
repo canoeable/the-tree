@@ -50,6 +50,7 @@ function getPointGen() {
 	if (player.t.points.gte(1)) gain = gain.times(tmp.t.effect)
 	if (player.c.points.gte(1)) gain = gain.times(new Decimal (25))
 	gain = gain.times(buyableEffect('p', 11))
+	gain = gain.times(tmp.a.effect)
 	return gain
 }
 

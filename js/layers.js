@@ -189,10 +189,12 @@ addLayer("p", { // prestige points
             }
         }
     },
-    doReset() {
+    doReset(resettingLayer) {
         let keep = [];
         if(hasMilestone('a', 11)&&resettingLayer == 'm' || 'b' || 'a')keep.push("upgrades");
         if(resettingLayer == 'p')keep.push("points");
+        if(resettingLayer == 'p')keep.push("buyables");
+        if(resettingLayer == 'p')keep.push("upgrades");
         layerDataReset(this.layer, keep);
     }
 })

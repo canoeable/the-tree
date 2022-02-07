@@ -89,8 +89,8 @@ addLayer("p", { // prestige points
     },
     upgrades: {
         11: {
-            title: "upgrade row 1 col 1",
-            description: "it has an effect.. figure it out. capped at x125",
+            title: "pres11",
+            description: "Multiplies points based on prestige points. (prestige points + 1, max x125",
             cost: new Decimal (1),
             effect() {
                 if (player[this.layer].points.add(1).gte(125)) {
@@ -102,8 +102,8 @@ addLayer("p", { // prestige points
             effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" },
         },
         12: {
-            title: "titles are hard to think of",
-            description: "upgrade 11 is applied again, but the boost is x0.2. capped at x50",
+            title: "pres12",
+            description: "Same effects as pres11, but the multiplier is x0.2. (pres11 * 0.2 + 1, max x50)",
             cost: new Decimal (15),
             effect() {
                 if (player[this.layer].points.times(0.2).add(1).gte(50)) {
@@ -122,8 +122,8 @@ addLayer("p", { // prestige points
             }
         },
         13: {
-            title: "upgrade",
-            description: "shiny new effect!! capped at x1000",
+            title: "pres13",
+            description: "Prestige points boost themselves. (prestige points ^ 0.05 + 1, max x1000",
             cost: new Decimal (1500),
             effect() {
                 if (player[this.layer].points.pow(0.05).add(1).gte(1000)) {
@@ -142,14 +142,14 @@ addLayer("p", { // prestige points
             }
         },
         14: {
-            title: "boost!",
-            description: "points are multiplied by (1.001^prestige points)+1. capped at x500",
+            title: "pres14",
+            description: "Point gain is multiplied based on prestige points. (1.001 ^ prestige points, max x500)",
             cost: new Decimal (5000),
             effect() {
-                if (new Decimal (1.001).pow(player[this.layer].points).add(1).gte(500)) {
+                if (new Decimal (1.001).pow(player[this.layer].points).gte(500)) {
                     return 500
                 } else {
-                    return new Decimal (1.001).pow(player[this.layer].points).add(1)
+                    return new Decimal (1.001).pow(player[this.layer].points)
                 }
             },
             effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" },
@@ -162,8 +162,8 @@ addLayer("p", { // prestige points
             }
         },
         15: {
-            title: "lol",
-            description: "Multiplies point generation by 0",
+            title: "pres15",
+            description: "Multiplies prestige points by 3.",
             cost: new Decimal (150000),
             unlocked() {
                 if (hasUpgrade('p', 14)) {
@@ -174,8 +174,8 @@ addLayer("p", { // prestige points
             }
         },
         21: {
-            title: "finally!",
-            description: "new layer!",
+            title: "pres21",
+            description: "Unlocks point boosts.",
             cost: new Decimal (1),
             unlocked() {
                 if (player[this.layer].points.gte(750001)) {
@@ -189,13 +189,6 @@ addLayer("p", { // prestige points
                 }
             }
         },
-        effectDescription() {
-            if (player[this.layer].points.gte(100000)) {
-                return "(softcapped)"
-            } else {
-                return ""
-            }
-        }
     },
     doReset(resettingLayer) {
         let keep = [];
@@ -416,6 +409,7 @@ addLayer("a", { // QoL points
     startData() { return {
         unlocked: true,
 		points: new Decimal(0),
+        total: true
     }},
     color: "#FF0A0A",
     requires: new Decimal(50), // Can be a function that takes requirement increases into account
@@ -461,7 +455,7 @@ addLayer("a", { // QoL points
             }
         },
         12: {
-            effectDescription: "Remove the bonus buyable, but use a formula to mirror its effects (10^(log10(prestige points)/4)*10).",
+            effectDescription: "Remove the bonus buyable, but use a formula to mirror its effects (10 ^(log10 (prestige points)/ 4 )* 10).",
             requirementDescription: "12 total QoL points",
             done() {
                 if (player.a.total.gte(12)) {

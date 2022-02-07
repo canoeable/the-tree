@@ -51,7 +51,7 @@ function getPointGen() {
 	if (player.c.points.gte(1)) gain = gain.times(new Decimal (25))
 	gain = gain.times(buyableEffect('p', 11))
 	gain = gain.times(tmp.a.effect)
-	if (hasMilestone('a', 12)) gain = gain.times(new Decimal (10).pow(Decimal.log10(player.p.points).div(4)).mul(10))
+	if (hasMilestone('a', 12)&&player.p.points.gte(1)) gain = gain.times(new Decimal (10).pow(Decimal.log10(player.p.points).div(4)).mul(10))
 	return gain
 }
 

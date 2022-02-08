@@ -17,7 +17,7 @@ addLayer("p", { // prestige points
         mult = new Decimal(1)
         if (hasUpgrade('p', 13)) mult = mult.times(upgradeEffect('p', 13))
         if (hasUpgrade('m', 11)) mult = mult.times(upgradeEffect('m', 11))
-        if (player.t.points.gte(2)) mult = mult.times(tmp.t.effect)
+        if (player.tfl.points.gte(2)) mult = mult.times(tmp.tfl.effect)
         if (player[this.layer].points.gte(100000)) mult = mult.pow(0.7)
         if (player[this.layer].points.gte(10000000)) mult = mult.pow(0.7)
         return mult
@@ -164,7 +164,7 @@ addLayer("p", { // prestige points
         15: {
             title: "pres15",
             description: "Multiplies prestige points by 3.",
-            cost: new Decimal (150000),
+            cost: new Decimal (600000),
             unlocked() {
                 if (hasUpgrade('p', 14)) {
                     return true
@@ -178,7 +178,7 @@ addLayer("p", { // prestige points
             description: "Unlocks point boosts.",
             cost: new Decimal (1),
             unlocked() {
-                if (player[this.layer].points.gte(750001)) {
+                if (player[this.layer].points.gte(3000000)) {
                     return true
                 } else {
                     if (hasUpgrade('p', 21)) {
@@ -249,16 +249,34 @@ addLayer("Cap Info", { // Caps
         },
     }
 })
+addLayer("per", { // perma upgrades
+    name: "Permanent Upgrades", // This is optional, only used in a few places, If absent it just uses the layer id.
+    symbol: "PU", // This appears on the layer's node. Default is the id with the first letter capitalized
+    color: "#4BDC13",
+    type: "none", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
+    row: "side",
+    tooltip: "Perma Upgrades",
+    upgrades: {
+        11: {
+            title: "perm11",
+            description: "Gain a x4 multiplier to points!",
+            cost: new Decimal (125000),
+            currencyDisplayName: "prestige points",
+            currencyInternalName: "points",
+            currencyLayer: "p"
+        }
+    }
+})
 addLayer("m", { // point boosts
     name: "point boosts", // This is optional, only used in a few places, If absent it just uses the layer id.
     symbol: "PB", // This appears on the layer's node. Default is the id with the first letter capitalized
     position: 0, // Horizontal position within a row. By default it uses the layer id and sorts in alphabetical order
     startData() { return {
-        unlocked: true,
+        unlocked() {return player.p.points.gte(3000000)},
 		points: new Decimal(0),
     }},
     color: "#047562",
-    requires: new Decimal(750000), // Can be a function that takes requirement increases into account
+    requires: new Decimal('3000000'), // Can be a function that takes requirement increases into account
     resource: "point boosts", // Name of prestige currency
     baseResource: "prestige points", // Name of resource prestige is based on
     baseAmount() {return player.p.points}, // Get the current amount of baseResource
@@ -266,7 +284,7 @@ addLayer("m", { // point boosts
     exponent: 0.88, // Prestige currency exponent
     gainMult() { // Calculate the multiplier for main currency from bonuses
         mult = new Decimal(1)
-        if (player.t.points.gte(3)) mult = mult.times(tmp.t.effect)
+        if (player.tfl.points.gte(3)) mult = mult.times(tmp.tfl.effect)
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -277,19 +295,7 @@ addLayer("m", { // point boosts
         {key: "o", description: "O: Reset for point boosts", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
     ],
     layerShown(){
-        if ((hasUpgrade('p', 21))) {
-            return true
-        } else {
-            if (player[this.layer].points.gte(1)) {
-                return true
-            } else {
-                if (hasUpgrade('m', 11)) {
-                    return true
-                } else {
-                    return false
-                }
-            }
-        } 
+        return true
     },
     branches: 'p',
     effect() {
@@ -361,11 +367,11 @@ addLayer("b", { // boosters
     resource: "booster", // Name of prestige currency
     baseResource: "point boosts", // Name of resource prestige is based on
     baseAmount() {return player.m.points}, // Get the current amount of baseResource
-    type: "static", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
-    exponent: 1.5, // Prestige currency exponent
+    type: "normal", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
+    exponent: 0.7, // Prestige currency exponent
     gainMult() { // Calculate the multiplier for main currency from bonuses
         mult = new Decimal(1)
-        if (player.t.points.gte(4)) mult = mult.times(tmp.t.effect)
+        if (player.tfl.points.gte(1)) mult = mult.times(tmp.tfl.effect)
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -376,7 +382,7 @@ addLayer("b", { // boosters
         {key: "b", description: "B: Reset for boosters", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
     ],
     layerShown(){
-        if (player.m.points.gte(20)) {
+        if (player.m.points.gte(50)) {
             return true
         } else {
             if (player[this.layer].total.gte(1)) {
@@ -388,19 +394,17 @@ addLayer("b", { // boosters
     },
     branches: 'm',
     effect() {
-        if (player.b.points.add(1).pow(2).gte(1)) {
-            if (player.b.points.add(1).pow(2).gte(25)) {
-                return 25
-            } else {
-                return player.b.points.add(1).pow(2)
-            }
-        } else {
-            return 1
-        }
+        eff = player[this.layer].points.mul(2).pow(1)
     },
     effectDescription() {
-        return "multiplying megaboop gain by " + format(tmp[this.layer].effect)
+        return "multiplying point boosts gain by " + format(tmp[this.layer].effect)
     },
+    upgrades: {
+        11: {
+            title: "boos11",
+            description: ""
+        }
+    }
 })
 addLayer("a", { // QoL points
     name: "QoL points", // This is optional, only used in a few places, If absent it just uses the layer id.
@@ -420,7 +424,7 @@ addLayer("a", { // QoL points
     exponent: 0.78, // Prestige currency exponent
     gainMult() { // Calculate the multiplier for main currency from bonuses
         mult = new Decimal(1)
-        if (player.t.points.gte(4)) mult = mult.times(tmp.t.effect)
+        if (player.tfl.points.gte(4)) mult = mult.times(tmp.tfl.effect)
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -477,8 +481,8 @@ addLayer("a", { // QoL points
         return "multiplying points by " + format(tmp[this.layer].effect) + ". 12 QoL milestone is " + format(new Decimal (10).pow(Decimal.log10(player.p.points).div(4)).mul(10)) + "x"
     }
 })
-addLayer("t", { // Trueboops
-    name: "trueboops", // This is optional, only used in a few places, If absent it just uses the layer id.
+addLayer("tfl", { // thefinallayer? points
+    name: "thefinallayer? points", // This is optional, only used in a few places, If absent it just uses the layer id.
     symbol: "Tb", // This appears on the layer's node. Default is the id with the first letter capitalized
     position: 1, // Horizontal position within a row. By default it uses the layer id and sorts in alphabetical order
     startData() { return {
@@ -487,9 +491,9 @@ addLayer("t", { // Trueboops
     }},
     color: "#FF0A0A",
     requires: new Decimal(6), // Can be a function that takes requirement increases into account
-    resource: "trueboops", // Name of prestige currency
-    baseResource: "QoL points", // Name of resource prestige is based on
-    baseAmount() {return player.a.points}, // Get the current amount of baseResource
+    resource: "thefinallayer? points", // Name of prestige currency
+    baseResource: "points", // Name of resource prestige is based on
+    baseAmount() {return player.points}, // Get the current amount of baseResource
     type: "static", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
     exponent: 2, // Prestige currency exponent
     gainMult() { // Calculate the multiplier for main currency from bonuses
@@ -501,10 +505,10 @@ addLayer("t", { // Trueboops
     },
     row: 3, // Row the layer is in on the tree (0 is the first row)
     hotkeys: [
-        {key: "q", description: "Q: Reset for trueboops", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
+        {key: "t", description: "T: Reset for thefinallayer? points", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
     ],
     layerShown(){
-        if (player.b.points.gte(6) && player.a.points.gte(6)) {
+        if (player.b.points.gte(1) && player.a.points.gte(1)) {
             return true
         } else {
             if (player[this.layer].total.gte(1)) {
@@ -516,11 +520,11 @@ addLayer("t", { // Trueboops
     },
     branches: 'a, b',
     effect() {
-        if (player.t.points.times(2).add(1).gte(1)) {
-            if (player.t.points.times(2).add(1).gte(16)) {
+        if (player.tfl.points.times(2).add(1).gte(1)) {
+            if (player.tfl.points.times(2).add(1).gte(16)) {
                 return 16
             } else {
-                return player.t.points.times(2).add(1)
+                return player.tfl.points.times(2).add(1)
             }
         } else {
             return 1

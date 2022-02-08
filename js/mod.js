@@ -47,11 +47,12 @@ function getPointGen() {
 	if (hasUpgrade('p', 12)) gain = gain.times(upgradeEffect('p', 12))
 	if (hasUpgrade('p', 14)) gain = gain.times(upgradeEffect('p', 14))
 	if (player.m.points.gte(1)) gain = gain.times(player.m.points.times(3))
-	if (player.t.points.gte(1)) gain = gain.times(tmp.t.effect)
+	if (player.tfl.points.gte(1)) gain = gain.times(tmp.tfl.effect)
 	if (player.c.points.gte(1)) gain = gain.times(new Decimal (25))
 	gain = gain.times(buyableEffect('p', 11))
 	gain = gain.times(tmp.a.effect)
 	if (hasMilestone('a', 12)&&player.p.points.gte(1)) gain = gain.times(new Decimal (10).pow(Decimal.log10(player.p.points).div(4)).mul(10))
+	if (hasUpgrade('per', 11)) gain = gain.times(new Decimal (4))
 	return gain
 }
 

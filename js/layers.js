@@ -300,8 +300,10 @@ addLayer("m", { // point boosts
     branches: 'p',
     effect() {
         eff = new Decimal (1)
-        eff = player[this.layer].points.pow(0.001)
-        if (eff.gte(1)) {eff = eff} else {eff = new Decimal (1)}
+        eff = player[this.layer].points.add(1).pow(0.0075)
+        eff = softcap(eff, new Decimal (1.5), 0.7)
+        eff = softcap(eff, new Decimal (1.7), 0.6)
+        eff = softcap(eff, new Decimal (2), 0.5)
         return eff
     },
     effectDescription() {
@@ -321,7 +323,7 @@ addLayer("m", { // point boosts
         },
         12: {
             title: "poin12",
-            description: "Keep prestige point upgrades on reset!",
+            description: "Autobuy prestige point upgrades!",
             cost: new Decimal (4),
             unlocked() {
                 if (hasUpgrade('m', 11)) {
@@ -333,10 +335,10 @@ addLayer("m", { // point boosts
         },
         13: {
             title: "poin13",
-            description: "Gain prestige points every second based on point boosts. (point boosts^1.5)",
+            description: "Gain prestige points every second based on point boosts. ((((point boosts+1)^1.2)/100), max 500%)",
             cost: new Decimal (12),
-            effect() {return player.m.points.pow(1.5)},
-            effectDisplay() { return format(upgradeEffect(this.layer, this.id)) + "x"},
+            effect() {return player.m.points.add(1).pow(1.2).div(100)},
+            effectDisplay() { return format(upgradeEffect(this.layer, this.id)) + "%"},
             unlocked() {
                 if (hasUpgrade('m', 12)) {
                     return true

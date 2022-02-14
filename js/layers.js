@@ -39,7 +39,7 @@ addLayer("p", { // prestige points
     },
     passiveGeneration() {
         if (hasUpgrade('m', 13)) {
-            return new Decimal (1)
+            return new Decimal (upgradeEffect('m', 13))
         } else {
             return new Decimal (0)
         }
@@ -272,11 +272,11 @@ addLayer("m", { // point boosts
     symbol: "PB", // This appears on the layer's node. Default is the id with the first letter capitalized
     position: 0, // Horizontal position within a row. By default it uses the layer id and sorts in alphabetical order
     startData() { return {
-        unlocked() {return player.p.points.gte(3000000)},
+        unlocked: true,
 		points: new Decimal(0),
     }},
     color: "#047562",
-    requires: new Decimal('3000000'), // Can be a function that takes requirement increases into account
+    requires: new Decimal(3000000), // Can be a function that takes requirement increases into account
     resource: "point boosts", // Name of prestige currency
     baseResource: "prestige points", // Name of resource prestige is based on
     baseAmount() {return player.p.points}, // Get the current amount of baseResource
@@ -284,7 +284,7 @@ addLayer("m", { // point boosts
     exponent: 0.88, // Prestige currency exponent
     gainMult() { // Calculate the multiplier for main currency from bonuses
         mult = new Decimal(1)
-        if (player.tfl.points.gte(3)) mult = mult.times(tmp.tfl.effect)
+        mult = mult.times(tmp.tfl.effect)
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -295,43 +295,34 @@ addLayer("m", { // point boosts
         {key: "o", description: "O: Reset for point boosts", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
     ],
     layerShown(){
-        return true
+        return hasUpgrade('p', 21) || player.m.total.gte(1)
     },
     branches: 'p',
     effect() {
         eff = new Decimal (1)
-        eff = eff.mul(player[this.layer].points).mul(3).add(1)
-        eff = softcap(eff, new Decimal (350), 0.7)
-        eff = softcap(eff, new Decimal (700), 0.5)
-        if(eff.gte(1000)) eff = new Decimal (1000)
+        eff = player[this.layer].points.pow(0.001)
+        if (eff.gte(1)) {eff = eff} else {eff = new Decimal (1)}
         return eff
     },
     effectDescription() {
-        return "multiplying point gain by " + format(tmp[this.layer].effect)
+        return "exponentiating point gain by ^" + format(tmp[this.layer].effect)
     },
     directMult() {
         dmult = new Decimal (1)
-        dmult = dmult.times(layers.b.effect())
         return dmult
     },
     upgrades: {
         11: {
-            title: "upgrades",
-            description: "boosts prestige points based on point boosts",
+            title: "poin11",
+            description: "Multiplies prestige points based on point boosts. (point boosts+1, max x10)",
             cost: new Decimal (1),
-            effect() {
-                if (player[this.layer].points.add(1).gte(10)) {
-                    return 10
-                } else {
-                    return player[this.layer].points.add(1)
-                }
-            },
-            effectDisplay() { return format(upgradeEffect(this.layer, this.id))+"x" }
+            effect() { return player.m.points.add(1) },
+            effectDisplay() { return format(upgradeEffect(this.layer, this.id)) + "x"},
         },
         12: {
-            title: "want automation?",
-            description: "autobuy S upgrades",
-            cost: new Decimal (3),
+            title: "poin12",
+            description: "Keep prestige point upgrades on reset!",
+            cost: new Decimal (4),
             unlocked() {
                 if (hasUpgrade('m', 11)) {
                     return true
@@ -341,9 +332,11 @@ addLayer("m", { // point boosts
             }
         },
         13: {
-            title: "true automation",
-            description: "gain 100% of S gain on reset!",
-            cost: new Decimal (10),
+            title: "poin13",
+            description: "Gain prestige points every second based on point boosts. (point boosts^1.5)",
+            cost: new Decimal (12),
+            effect() {return player.m.points.pow(1.5)},
+            effectDisplay() { return format(upgradeEffect(this.layer, this.id)) + "x"},
             unlocked() {
                 if (hasUpgrade('m', 12)) {
                     return true
@@ -351,7 +344,7 @@ addLayer("m", { // point boosts
                     return false
                 }
             }
-        },
+        }
     }
 })
 addLayer("b", { // boosters

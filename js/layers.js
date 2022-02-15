@@ -250,22 +250,30 @@ addLayer("Cap Info", { // Caps
     }
 })
 addLayer("per", { // perma upgrades
-    name: "Permanent Upgrades", // This is optional, only used in a few places, If absent it just uses the layer id.
+    name: "Research", // This is optional, only used in a few places, If absent it just uses the layer id.
     symbol: "PU", // This appears on the layer's node. Default is the id with the first letter capitalized
-    color: "#4BDC13",
-    type: "none", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
+    color: "#45D4FF",
+    type: "normal", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
     row: "side",
-    tooltip: "Perma Upgrades",
+    tooltip: "Research",
+    startData() { return {
+        unlocked: true,
+		points: new Decimal(0),
+    }},
+    requires: new Decimal(10),
+    resource: "research points",
+    baseResource: "points",
+    baseAmount() {return player.points},
     upgrades: {
         11: {
             title: "perm11",
             description: "Gain a x4 multiplier to points!",
-            cost: new Decimal (125000),
-            currencyDisplayName: "prestige points",
-            currencyInternalName: "points",
-            currencyLayer: "p"
+            cost: new Decimal (1000),
         }
-    }
+    },
+    exponent: 0.5,
+    canReset() {return false},
+    automate() {player.per.points = player.per.points.add(player.points.log10().div(20))}
 })
 addLayer("m", { // point boosts
     name: "point boosts", // This is optional, only used in a few places, If absent it just uses the layer id.
@@ -337,7 +345,12 @@ addLayer("m", { // point boosts
             title: "poin13",
             description: "Gain prestige points every second based on point boosts. ((((point boosts+1)^1.2)/100), max 500%)",
             cost: new Decimal (12),
-            effect() {return player.m.points.add(1).pow(1.2).div(100)},
+            effect() {
+                eff = new Decimal (1)
+                eff = eff.add(player.b.points.pow(1.2).div(100))
+                if (eff.gte(5)) eff = 5
+                return eff
+            },
             effectDisplay() { return format(upgradeEffect(this.layer, this.id)) + "%"},
             unlocked() {
                 if (hasUpgrade('m', 12)) {
@@ -346,7 +359,7 @@ addLayer("m", { // point boosts
                     return false
                 }
             }
-        }
+        },
     }
 })
 addLayer("b", { // boosters
@@ -397,7 +410,7 @@ addLayer("b", { // boosters
     upgrades: {
         11: {
             title: "boos11",
-            description: ""
+            description: "placeholder.exe"
         }
     }
 })

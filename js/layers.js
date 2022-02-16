@@ -235,20 +235,6 @@ addLayer("c", { // ???
         layerDataReset(this.layer, keep);
     }
 })
-addLayer("Cap Info", { // Caps
-    name: "Cap Info", // This is optional, only used in a few places, If absent it just uses the layer id.
-    symbol: "CI", // This appears on the layer's node. Default is the id with the first letter capitalized
-    color: "#4BDC13",
-    type: "none", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
-    row: "side",
-    tooltip: "Cap Info",
-    infoboxes: {
-        Row1: {
-            title: "softcaps",
-            body() { return "prestige points: 100,000 and every 2 OoMs after (so 100,000, 10,000,000 etc) the gain is brought to the 0.7th power. point boosts: After 100 and every OoM after that, gain is brought to ^0.9" },
-        },
-    }
-})
 addLayer("per", { // perma upgrades
     name: "Research", // This is optional, only used in a few places, If absent it just uses the layer id.
     symbol: "PU", // This appears on the layer's node. Default is the id with the first letter capitalized
@@ -266,14 +252,39 @@ addLayer("per", { // perma upgrades
     baseAmount() {return player.points},
     upgrades: {
         11: {
-            title: "perm11",
+            title: "Point Boost 1",
             description: "Gain a x4 multiplier to points!",
             cost: new Decimal (1000),
         }
     },
     exponent: 0.5,
     canReset() {return false},
-    automate() {player.per.points = player.per.points.add(player.points.log10().div(20))}
+    automate() {
+        eff = new Decimal (0)
+        eff = eff.add(player.points.log10().div(20))
+        if (hasAchievement('ach', 11)) eff = eff.mul(1.2)
+        player.per.points = player.per.points.add(eff)
+    }
+})
+addLayer("ach", {
+    startData() { return {
+        unlocked: true,
+        points: new Decimal(0),
+    }},
+    color: "yellow",
+    resource: "achievement power", 
+    row: "side",
+    tooltip() { // Optional, tooltip displays when the layer is locked
+        return ("Achievements")
+    },
+    achievementPopups: true,
+    achievements: {
+        11: {
+            name: "Researched!",
+            done() {return hasUpgrade('per', 11)},
+            tooltip() {return "Research 'Point Boost 1'. Effect: 1.2x more research point gain. Currently: +" + format(Decimal.log10(player.points).mul(1.2).div(6))},
+        },
+    },
 })
 addLayer("m", { // point boosts
     name: "point boosts", // This is optional, only used in a few places, If absent it just uses the layer id.
@@ -346,12 +357,14 @@ addLayer("m", { // point boosts
             description: "Gain prestige points every second based on point boosts. ((((point boosts+1)^1.2)/100), max 500%)",
             cost: new Decimal (12),
             effect() {
-                eff = new Decimal (1)
-                eff = eff.add(player.b.points.pow(1.2).div(100))
-                if (eff.gte(5)) eff = 5
-                return eff
+                if (player[this.layer].points.pow(1.2).div(100).gte(5)) {
+                    return new Decimal(5)
+                } else {
+                    return player[this.layer].points.pow(1.2).div(100)
+                }
+
             },
-            effectDisplay() { return format(upgradeEffect(this.layer, this.id)) + "%"},
+            effectDisplay() { return format(upgradeEffect(this.layer, this.id).mul(100)) + "%"},
             unlocked() {
                 if (hasUpgrade('m', 12)) {
                     return true
@@ -480,13 +493,19 @@ addLayer("a", { // QoL points
     },
     effect() {
         eff = new Decimal (1)
-        eff = eff.mul(player[this.layer].points).mul(3.3).add(1)
+        eff = eff.mul(player[this.layer].points).mul(1.5).add(1)
         eff = softcap(eff, new Decimal (33), 0.66)
-        if(eff.gte(68)) eff = 99
+        if(eff.gte(99)) eff = 99
         return eff
     },
     effectDescription() {
         return "multiplying points by " + format(tmp[this.layer].effect) + ". 12 QoL milestone is " + format(new Decimal (10).pow(Decimal.log10(player.p.points).div(4)).mul(10)) + "x"
+    },
+    upgrades: {
+        11: {
+            title: "l",
+            description: "l"
+        }
     }
 })
 addLayer("tfl", { // thefinallayer? points

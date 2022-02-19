@@ -20,6 +20,7 @@ addLayer("p", { // prestige points
         if (player.tfl.points.gte(2)) mult = mult.times(tmp.tfl.effect)
         if (player[this.layer].points.gte(100000)) mult = mult.pow(0.7)
         if (player[this.layer].points.gte(10000000)) mult = mult.pow(0.7)
+        mult = mult.times(player.per.prestmul)
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -197,7 +198,7 @@ addLayer("p", { // prestige points
         if(resettingLayer == 'p')keep.push("buyables");
         if(resettingLayer == 'p')keep.push("upgrades");
         layerDataReset(this.layer, keep);
-    }
+    },
 })
 addLayer("c", { // ???
     name: "Club Access", // This is optional, only used in a few places, If absent it just uses the layer id.
@@ -245,6 +246,9 @@ addLayer("per", { // perma upgrades
     startData() { return {
         unlocked: true,
 		points: new Decimal(0),
+        pointmul: new Decimal (1),
+        prestmul: new Decimal (1),
+        boostmul: new Decimal (1),
     }},
     requires: new Decimal(10),
     resource: "research points",
@@ -254,8 +258,45 @@ addLayer("per", { // perma upgrades
         11: {
             title: "Point Boost 1",
             description: "Gain a x4 multiplier to points!",
-            cost: new Decimal (1000),
-        }
+            cost: new Decimal (666),
+            onPurchase() {player.per.pointmul = player.per.pointmul.mul(4)}
+        },
+        21: {
+            title: "Point Boost 2",
+            description: "Gain a x3 multiplier to points!",
+            cost() {
+                cost = new Decimal (3333)
+                if (hasUpgrade('per', 13)) cost = cost.mul(4)
+                if (hasUpgrade('per', 14)) cost = cost.mul(4)
+                return cost
+            },
+            branches: ["11"],
+            onPurchase() {player.per.pointmul = player.per.pointmul.mul(3)}
+        },
+        22: {
+            title: "Prestige Point Boost 1",
+            description: "Gain a x2.5 multiplier to prestige points!",
+            cost() {
+                cost = new Decimal (3333)
+                if (hasUpgrade('per', 12)) cost = cost.mul(4)
+                if (hasUpgrade('per', 14)) cost = cost.mul(4)
+                return cost
+            },
+            branches: ["11"],
+            onPurchase() {player.per.prestmul = player.per.prestmul.mul(2.5)}
+        },
+        23: {
+            title: "Point Boost 1",
+            description: "Gain a x2 multiplier to point boosts!",
+            cost() {
+                cost = new Decimal (3333)
+                if (hasUpgrade('per', 13)) cost = cost.mul(4)
+                if (hasUpgrade('per', 12)) cost = cost.mul(4)
+                return cost
+            },
+            branches: ["11"],
+            onPurchase() {player.per.boostmul = player.per.boostmul.mul(2)}
+        },
     },
     exponent: 0.5,
     canReset() {return false},
@@ -264,12 +305,17 @@ addLayer("per", { // perma upgrades
         eff = eff.add(player.points.log10().div(20))
         if (hasAchievement('ach', 11)) eff = eff.mul(1.2)
         player.per.points = player.per.points.add(eff)
-    }
+    },
+    tabFormat: [
+        'main-display',
+        'upgrades'
+    ]
 })
 addLayer("ach", {
     startData() { return {
         unlocked: true,
         points: new Decimal(0),
+        ach21: new Decimal(0)
     }},
     color: "yellow",
     resource: "achievement power", 
@@ -284,7 +330,17 @@ addLayer("ach", {
             done() {return hasUpgrade('per', 11)},
             tooltip() {return "Research 'Point Boost 1'. Effect: 1.2x more research point gain. Currently: +" + format(Decimal.log10(player.points).mul(1.2).div(6))},
         },
+        21: {
+            name: "Row 2",
+            done() {return hasUpgrade('per', 11)&&hasUpgrade('per', 21)&&hasUpgrade('per', 22)&&hasUpgrade('per', 23)},
+            tooltip() {return "Research 4 things. Effect: Gain +0.0003 research point gain per tick after you got this achievement. Currently: +" + format(player.ach.ach21)},
+        }
     },
+    automate() {
+        gain = new Decimal (0)
+        if (hasAchievement('ach', 21)) gain = gain.add(0.0003)
+        player.p.ach21 = gain
+    }
 })
 addLayer("m", { // point boosts
     name: "point boosts", // This is optional, only used in a few places, If absent it just uses the layer id.
@@ -304,6 +360,7 @@ addLayer("m", { // point boosts
     gainMult() { // Calculate the multiplier for main currency from bonuses
         mult = new Decimal(1)
         mult = mult.times(tmp.tfl.effect)
+        mult = mult.times(player.per.boostmul)
         return mult
     },
     gainExp() { // Calculate the exponent on main currency from bonuses
@@ -538,7 +595,7 @@ addLayer("tfl", { // thefinallayer? points
         if (player.b.points.gte(1) && player.a.points.gte(1)) {
             return true
         } else {
-            if (player[this.layer].total.gte(1)) {
+            if (player[this.layer].points.gte(1)) {
                 return true
             } else {
                 return false
